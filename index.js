@@ -236,6 +236,10 @@ PushwooshClient.prototype.sendRequest = function (method, data, callback) {
 };
 
 PushwooshClient.prototype.parseResponse = function(response, body, callback) {
+    if (!body) {
+        return callback(new Error(`${response.statusCode} status code, empty body`))
+    }
+
     if (response.statusCode === 200 && body.status_code === 200) {
         return callback(null, body.response);
     }

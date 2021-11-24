@@ -1820,4 +1820,45 @@ test('Pushwoosh client configured to not send to all devices', function (t) {
             'No devices provided error expected!'
         );
       });
+      
+});
+
+test('Pushwoosh send message test with returning null body', function (t) {
+    t.plan(5);
+
+    var mockResponse = {
+            statusCode: 200
+        },
+        mockBodyResponse = {
+            status_code: 200,
+            response: {}
+        },
+        expectedBody = {
+            request: {
+                applications_group: testAppCode,
+                auth: testAuthToken,
+                notifications: [{
+                    send_date: 'now',
+                    ignore_user_timezone: true,
+                    content: testMsg
+                }]
+            }
+        };
+
+    fraudster.registerMock('request', function (params, callback) {
+        t.ok(params, 'Params exists');
+        t.deepEqual(params.body, expectedBody, 'Body are as expected');
+        t.equal(params.method, 'POST', 'Method is POST as expected');
+        callback(null, mockResponse);
+    });
+
+    var PwClient = getCleanTestObject(),
+        client = new PwClient(testAppCode, testAuthToken, {useApplicationsGroup: true});
+
+
+    client.sendMessage(testMsg, function (err, response) {
+        t.ok(err, 'Error as expected');
+        t.deepEqual(response, undefined, 'response is the same');
+    });
+
 });
